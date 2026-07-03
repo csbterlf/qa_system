@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI 智能问答系统</title>
+    <style>
+        /* ===== 全局样式 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* ===== 主容器 ===== */
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        /* ===== 头部 ===== */
+        .header {
+            background: linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%);
+            color: white;
+            padding: 20px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-title .icon {
+            font-size: 28px;
+        }
+
+        .header-status {
+            font-size: 12px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ===== 聊天消息区域 ===== */
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+            background: #f8f9fc;
+        }
+
+        /* 滚动条美化 */
+        .chat-area::-webkit-scrollbar {
+            width: 5px;
+        }
+        .chat-area::-webkit-scrollbar-track {
+            background: #e9ecef;
+            border-radius: 10px;
+        }
+        .chat-area::-webkit-scrollbar-thumb {
+            background: #c4c9d4;
+            border-radius: 10px;
+        }
+
+        /* ===== 消息气泡 ===== */
+        .message {
+            display: flex;
+            margin-bottom: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .message.bot .avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-right: 12px;
+        }
+
+        .message.user .avatar {
+            background: #e9ecef;
+            margin-left: 12px;
+            order: 2;
+        }
+
+        .message .bubble {
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+
+        .message.bot .bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .message.user .bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message .time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .message.user .time {
+            text-align: right;
+        }
+
+        /* ===== 推荐问题 ===== */
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 12px 24px 8px;
+            background: #f8f9fc;
+            flex-shrink: 0;
+        }
+
+        .suggestions .suggestion-btn {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestions .suggestion-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-1px);
+        }
+
+        /* ===== 输入区域 ===== */
+        .input-area {
+            display: flex;
+            padding: 16px 24px 20px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e9ecef;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .input-area input:focus {
+            border-color: #667eea;
+        }
+
+        .input-area input::placeholder {
+            color: #bbb;
+        }
+
+        .input-area button {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .input-area button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .input-area button:active {
+            transform: translateY(0);
+        }
+
+        .input-area button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== 加载动画 ===== */
+        .typing {
+            display: flex;
+            gap: 4px;
+            padding: 4px 0;
+        }
+
+        .typing span {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s ease-in-out infinite;
+        }
+
+        .typing span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 500px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+                padding: 0;
+            }
+            .header {
+                padding: 14px 18px;
+            }
+            .header-title h1 {
+                font-size: 16px;
+            }
+            .chat-area {
+                padding: 14px 16px;
+            }
+            .input-area {
+                padding: 12px 16px 16px;
+            }
+            .message .bubble {
+                font-size: 13px;
+                max-width: 85%;
+            }
+            .suggestions {
+                padding: 8px 16px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- ===== 头部 ===== -->
+        <div class="header">
+            <div class="header-title">
+                <span class="icon">🤖</span>
+                <h1>AI 智能问答</h1>
+            </div>
+            <div class="header-status">
+                <span class="status-dot"></span>
+                <span>在线</span>
+            </div>
+        </div>
+
+        <!-- ===== 聊天区域 ===== -->
+        <div class="chat-area" id="chatArea">
+            <!-- 欢迎消息 -->
+            <div class="message bot">
+                <div class="avatar">🤖</div>
+                <div class="bubble">
+                    👋 你好！我是你的 AI 助手。<br>
+                    试试问我下面这些问题，或者输入你想问的！
+                    <div class="time">刚刚</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 快捷提问 ===== -->
+        <div class="suggestions" id="suggestions">
+            <button class="suggestion-btn" data-q="BERT的全称是什么">📚 BERT是什么</button>
+            <button class="suggestion-btn" data-q="Python是什么">🐍 Python是什么</button>
+            <button class="suggestion-btn" data-q="人工智能是什么">🧠 人工智能是什么</button>
+            <button class="suggestion-btn" data-q="机器学习是什么">📊 机器学习是什么</button>
+            <button class="suggestion-btn" data-q="深度学习是什么">🧬 深度学习是什么</button>
+        </div>
+
+        <!-- ===== 输入区域 ===== -->
+        <div class="input-area">
+            <input type="text" id="inputBox" placeholder="输入你的问题..." />
+            <button id="sendBtn">发送</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  JavaScript 逻辑
+        // ============================================================
+
+        // ---- 获取页面元素 ----
+        const chatArea = document.getElementById('chatArea');
+        const inputBox = document.getElementById('inputBox');
+        const sendBtn = document.getElementById('sendBtn');
+        const suggestionBtns = document.querySelectorAll('.suggestion-btn');
+
+        // ---- API 地址 ----
+        const API_URL = 'http://localhost:5000/ask';
+
+        // ---- 发送消息函数 ----
+        async function sendQuestion(question) {
+            // 1. 如果问题为空，不发送
+            if (!question || question.trim() === '') return;
+
+            // 2. 清空输入框
+            inputBox.value = '';
+
+            // 3. 在聊天区域显示用户的问题
+            addMessage('user', question);
+
+            // 4. 显示机器人 "正在思考..." 的占位消息
+            const botMessageId = addBotTyping();
+
+            try {
+                // 5. 调用后端 API
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+
+                const data = await response.json();
+
+                // 6. 移除 "正在思考..." 的占位
+                removeBotTyping(botMessageId);
+
+                // 7. 显示机器人的回复
+                const answer = data.answer || '抱歉，我没有理解你的问题。';
+                const confidence = data.confidence ? ` (置信度: ${Math.round(data.confidence * 100)}%)` : '';
+                addMessage('bot', answer + confidence);
+
+            } catch (error) {
+                // 如果请求失败
+                removeBotTyping(botMessageId);
+                addMessage('bot', '❌ 连接服务器失败，请确认后端服务是否正在运行 (python app_offline_enhanced.py)');
+                console.error('请求错误:', error);
+            }
+        }
+
+        // ---- 添加普通消息 ----
+        function addMessage(type, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = type === 'user' ? '👤' : '🤖';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+
+            // 支持换行
+            bubble.innerHTML = content.replace(/\n/g, '<br>');
+
+            // 添加时间
+            const time = document.createElement('div');
+            time.className = 'time';
+            const now = new Date();
+            time.textContent = now.getHours().toString().padStart(2, '0') + ':' + 
+                              now.getMinutes().toString().padStart(2, '0');
+
+            bubble.appendChild(time);
+
+            if (type === 'user') {
+                messageDiv.appendChild(bubble);
+                messageDiv.appendChild(avatar);
+            } else {
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(bubble);
+            }
+
+            chatArea.appendChild(messageDiv);
+            // 滚动到底部
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // ---- 添加"正在思考..."占位 ----
+        function addBotTyping() {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            messageDiv.id = 'typing-' + Date.now();
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = '🤖';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.innerHTML = `
+                <div class="typing">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            return messageDiv.id;
+        }
+
+        // ---- 移除"正在思考..."占位 ----
+        function removeBotTyping(id) {
+            const typingEl = document.getElementById(id);
+            if (typingEl) {
+                typingEl.remove();
+            }
+        }
+
+        // ---- 事件绑定 ----
+
+        // 点击发送按钮
+        sendBtn.addEventListener('click', function() {
+            const question = inputBox.value.trim();
+            sendQuestion(question);
+        });
+
+        // 按 Enter 键发送
+        inputBox.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const question = inputBox.value.trim();
+                sendQuestion(question);
+            }
+        });
+
+        // 点击快捷提问按钮
+        suggestionBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const question = this.getAttribute('data-q');
+                sendQuestion(question);
+            });
+        });
+
+        // ---- 输入框自动获得焦点 ----
+        inputBox.focus();
+
+        console.log('🚀 AI 问答前端已加载！');
+        console.log('📡 后端 API 地址:', API_URL);
+    </script>
+
+</body>
+</html>
