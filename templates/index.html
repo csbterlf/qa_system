@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI 智能问答系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <!-- ===== 头部 ===== -->
+        <div class="header">
+            <div class="header-title">
+                <span class="icon">🤖</span>
+                <h1>AI 智能问答</h1>
+            </div>
+            <div class="header-status">
+                <span class="status-dot"></span>
+                <span>在线</span>
+            </div>
+        </div>
+
+        <!-- ===== 聊天区域 ===== -->
+        <div class="chat-area" id="chatArea">
+            <!-- 欢迎消息 -->
+            <div class="message bot">
+                <div class="avatar">🤖</div>
+                <div class="bubble">
+                    👋 你好！我是你的 AI 助手。<br>
+                    试试问我下面这些问题，或者输入你想问的！
+                    <div class="time">刚刚</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 快捷提问 ===== -->
+        <div class="suggestions" id="suggestions">
+            <button class="suggestion-btn" data-q="BERT的全称是什么">📚 BERT是什么</button>
+            <button class="suggestion-btn" data-q="Python是什么">🐍 Python是什么</button>
+            <button class="suggestion-btn" data-q="人工智能是什么">🧠 人工智能是什么</button>
+            <button class="suggestion-btn" data-q="机器学习是什么">📊 机器学习是什么</button>
+            <button class="suggestion-btn" data-q="深度学习是什么">🧬 深度学习是什么</button>
+        </div>
+
+        <!-- ===== 输入区域 ===== -->
+        <div class="input-area">
+            <input type="text" id="inputBox" placeholder="输入你的问题..." />
+            <button id="sendBtn">发送</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
