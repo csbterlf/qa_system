@@ -1,5 +1,5 @@
+# core/knowledge_base.py
 import json
-import os
 
 class KnowledgeBase:
     def __init__(self, file_path="data/qa_data.json"):

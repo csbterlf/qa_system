@@ -1,3 +1,4 @@
+# config.py
 class Config:
     # 服务器配置
     HOST = '0.0.0.0'

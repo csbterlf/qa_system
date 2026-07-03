@@ -1,3 +1,8 @@
+# app.py
+from dotenv import load_dotenv
+load_dotenv()  # 加载 .env 文件中的环境变量
+
+import os
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
@@ -22,13 +27,14 @@ def ask():
         question = data.get("question", "")
         if not question:
             return jsonify({"error": "请提供问题"}), 400
-        
+
+        # 直接调用同步的 match 方法（无需异步）
         answer, confidence = Matcher.match(question, kb.get_all())
-        
+
         return jsonify({
             "question": question,
             "answer": answer,
-            "confidence": round(confidence, 2),
+            "confidence": confidence,
             "knowledge_base_size": len(kb.get_all())
         })
     except Exception as e:
@@ -47,7 +53,7 @@ def add_knowledge():
 
 if __name__ == "__main__":
     print("=" * 50)
-    print("🚀 AI智能问答系统 V0.2 启动中...")
+    print("🚀 AI智能问答系统 V0.3 启动中...")
     print(f"📚 知识库条目: {len(kb.get_all())}")
     print(f"🌐 访问地址: http://{Config.HOST}:{Config.PORT}")
     print("=" * 50)
