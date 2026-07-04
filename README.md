@@ -25,27 +25,8 @@
 
 ## 🏗️ 项目结构
 
-qa_system/
-├── app.py # Flask 主入口
-├── config.py # 配置文件
-├── core/
-│ ├── init.py
-│ ├── knowledge_base.py # 知识库管理
-│ └── matcher.py # 匹配引擎（关键词 + 大模型）
-├── data/
-│ └── qa_data.json # 本地知识库数据
-├── templates/
-│ └── index.html # 前端聊天界面
-├── static/
-│ ├── css/
-│ │ └── style.css # 样式文件
-│ └── js/
-│ └── script.js # 前端逻辑
-├── requirements.txt # Python 依赖
-├── .env # 环境变量（API Key）
-├── .gitignore # Git 忽略文件
-└── README.md # 项目说明
 
+![alt text](image.png)
 
 ---
 
