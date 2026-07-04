@@ -207,7 +207,41 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            addMessage('user', `[图片] ${file.name}`);
+            // ---- 新增：显示图片预览 ----
+            const reader_preview = new FileReader();
+            reader_preview.onload = function(e) {
+                // 在聊天区域显示图片（用户消息）
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message user';
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar';
+                avatar.textContent = '👤';
+                
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                // 显示图片缩略图
+                bubble.innerHTML = `
+                    <img src="${e.target.result}" style="max-width:200px; max-height:200px; border-radius:8px; margin-bottom:4px;" />
+                    <div style="font-size:12px; color:#999;">${file.name}</div>
+                `;
+                
+                // 添加时间
+                const time = document.createElement('div');
+                time.className = 'time';
+                const now = new Date();
+                time.textContent = now.getHours().toString().padStart(2, '0') + ':' + 
+                                now.getMinutes().toString().padStart(2, '0');
+                bubble.appendChild(time);
+                
+                messageDiv.appendChild(bubble);
+                messageDiv.appendChild(avatar);
+                chatArea.appendChild(messageDiv);
+                chatArea.scrollTop = chatArea.scrollHeight;
+            };
+            reader_preview.readAsDataURL(file);
+
+            // ---- 发送图片到后端识别 ----
             const botMessageId = addBotTyping();
 
             try {
@@ -215,14 +249,14 @@
                 reader.readAsDataURL(file);
                 reader.onloadend = async function() {
                     const base64Data = reader.result.split(',')[1];
-                    
+            
                     const response = await fetch(IMAGE_API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ image: base64Data })
                     });
                     const data = await response.json();
-                    
+            
                     removeBotTyping(botMessageId);
                     addMessage('bot', data.answer || '识别完成');
                 };
@@ -231,7 +265,7 @@
                 addMessage('bot', '❌ 图片上传失败: ' + error.message);
             }
             
-            fileInput.value = ''; // 重置文件选择
+            fileInput.value = '';
         };
 
 
