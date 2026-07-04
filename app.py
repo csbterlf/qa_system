@@ -51,6 +51,24 @@ def add_knowledge():
     kb.add(question, answer)
     return jsonify({"message": "知识添加成功", "total": len(kb.get_all())})
 
+# app.py 新增部分
+@app.route("/ask_image", methods=["POST"])
+def ask_image():
+    try:
+        data = request.json
+        image_base64 = data.get("image", "")
+        question = data.get("question", "请详细描述这张图片的内容")
+        if not image_base64:
+            return jsonify({"error": "请提供图片"}), 400
+
+        answer, confidence = Matcher.match_image(image_base64, question)
+        return jsonify({
+            "answer": answer,
+            "confidence": confidence
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     print("=" * 50)
     print("🚀 AI智能问答系统 V0.3 启动中...")

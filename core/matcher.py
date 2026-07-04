@@ -1,5 +1,6 @@
 # core/matcher.py
 import os
+import base64
 from zhipuai import ZhipuAI
 
 class Matcher:
@@ -31,3 +32,31 @@ class Matcher:
                 return "❌ 网络连接失败，请检查网络后重试", 0.0
             else:
                 return f"❌ AI服务异常: {error_msg}", 0.0
+    @staticmethod
+    def match_image(image_base64, user_question="请详细描述这张图片的内容"):
+        """识别图片内容"""
+        try:
+            response = Matcher.client.chat.completions.create(
+                model="glm-4v-flash",  # 使用视觉模型
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{image_base64}"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": user_question
+                            }
+                        ]
+                    }
+                ]
+            )
+            answer = response.choices[0].message.content
+            return answer, 0.95
+        except Exception as e:
+            return f"❌ 图片识别失败: {str(e)}", 0.0

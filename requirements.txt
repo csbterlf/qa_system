@@ -4,3 +4,4 @@ zhipuai
 python-dotenv
 gunicorn
 sniffio
+Pillow

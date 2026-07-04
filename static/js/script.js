@@ -9,6 +9,7 @@
         const sendBtn = document.getElementById('sendBtn');
         const suggestionBtns = document.querySelectorAll('.suggestion-btn');
 
+
         // ---- API 地址 ----
         const API_URL = 'https://qa-system-zan7.onrender.com/ask';
 
@@ -157,4 +158,81 @@
 
         console.log('🚀 AI 问答前端已加载！');
         console.log('📡 后端 API 地址:', API_URL);
+
+
+            // static/js/script.js 新增部分
+        const IMAGE_API_URL = window.location.origin + '/ask_image';
+
+        // ---- 语音识别 ----
+        const voiceBtn = document.getElementById('voiceBtn');
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'zh-CN';
+        recognition.continuous = false;
+        recognition.interimResults = true;
+
+        voiceBtn.addEventListener('click', function() {
+            recognition.start();
+            voiceBtn.textContent = '🔴';
+        });
+
+        recognition.onresult = function(event) {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            inputBox.value = transcript;
+            // 可选：识别完成后自动发送
+            if (event.results[0].isFinal) {
+                voiceBtn.textContent = '🎤';
+                sendQuestion(transcript);
+            }
+        };
+
+        recognition.onerror = function() {
+            voiceBtn.textContent = '🎤';
+            addMessage('bot', '⚠️ 语音识别失败，请检查麦克风权限或手动输入。');
+        };
+
+        // ---- 图片上传 ----
+        const imageBtn = document.getElementById('imageBtn');
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+
+        imageBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        fileInput.onchange = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            addMessage('user', `[图片] ${file.name}`);
+            const botMessageId = addBotTyping();
+
+            try {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = async function() {
+                    const base64Data = reader.result.split(',')[1];
+                    
+                    const response = await fetch(IMAGE_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: base64Data })
+                    });
+                    const data = await response.json();
+                    
+                    removeBotTyping(botMessageId);
+                    addMessage('bot', data.answer || '识别完成');
+                };
+            } catch (error) {
+                removeBotTyping(botMessageId);
+                addMessage('bot', '❌ 图片上传失败: ' + error.message);
+            }
+            
+            fileInput.value = ''; // 重置文件选择
+        };
+
+
     
