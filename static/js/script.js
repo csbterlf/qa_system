@@ -10,7 +10,7 @@
         const suggestionBtns = document.querySelectorAll('.suggestion-btn');
 
         // ---- API 地址 ----
-        const API_URL = 'http://localhost:5000/ask';
+        const API_URL = 'https://qa-system-zan7.onrender.com/ask';
 
         // ---- 发送消息函数 ----
         async function sendQuestion(question) {
