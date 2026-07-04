@@ -26,7 +26,7 @@
 ## 🏗️ 项目结构
 
 
-![alt text](image.png)
+![项目结构](images/structure.png)
 
 ---
 
